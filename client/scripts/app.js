@@ -1,10 +1,14 @@
 // YOUR CODE HERE:
 var app = {};
 app.server = 'https://api.parse.com/1/classes/chatterbox';
+app.user = "";
+app.rooms = [];
 app.messages = [];
 
 app.init = function() {
-  app.messages;
+  var nameStartIndex = window.location.search.lastIndexOf('=');
+  app.user = window.location.search.slice(nameStartIndex + 1);
+
 
   // Comment below code out to stop hacking
   var hackerReactor = {
@@ -42,6 +46,8 @@ app.fetch = function() {
     success: function (data) {
       console.log('chatterbox: Messages retrieved');
       app.messages = data['results'];
+      generateRooms(app.messages);
+      renderRoomOptions(app.rooms);
       renderMessage(app.messages);
     },
     error: function(data) {
@@ -56,12 +62,12 @@ var escape = function(message) {
   var greaterThan = />/g; escapes.push([greaterThan, "&gt;"]);
   var apostrophe = /'/g; escapes.push([apostrophe, "&#39;"]);
   var doubleClose = /"/g; escapes.push([doubleClose, "&#34;"]);
-  // var ampersand = /&/g; escapes.push([ampersand, "&#38;"]);
+  var ampersand = /&/g; escapes.push([ampersand, "&#38;"]);
   // var tick = /`/g; escapes.push([tick, "&#96;"]);
   // var bang = /!/g; escapes.push([bang, "&#33;"]);
   // var at = /@/g; escapes.push([at, "&#64;"]);
   // var equals = /=/g; escapes.push([equals, "&61;"]);
-  // var percent = /%/g; escapes.push([percent, "&#37;"]);
+  var percent = /%/g; escapes.push([percent, "&#37;"]);
 
   // var openPar = /(/g; escapes.push([openPar, "&lpar;"]);
   // var closePar = /)/g; escapes.push([closePar, "&rpar;"]);
@@ -78,7 +84,7 @@ var escape = function(message) {
 };
 
 var renderMessage = function(messages) {
-  $("#chats").empty();
+  app.clearMessages();
   _.each(messages, function(message) {
     if (message["roomname"] && message["text"] && message["username"]) {
       $("#chats").append('<div class="tweet"><li class="room">' 
@@ -91,5 +97,38 @@ var renderMessage = function(messages) {
     }
   });
 };
+
+var generateRooms = function(messages) {
+  app.rooms = [];
+  _.each(messages, function (message) {
+    if (message["roomname"]) {
+      app.rooms.push(message["roomname"]);
+    }
+  });
+  app.rooms = _.uniq(app.rooms);
+};
+
+var renderRoomOptions = function(rooms) {
+  $("#roomOptions").empty();
+  _.each(rooms, function(room) {
+    $("#roomOptions").append("<option value=" + room + ">" + room + "</option>");
+  });
+};
+
+app.clearMessages = function() {
+  $("#chats").empty();
+};
+
+$("#sendMessage").on("click", function () {
+  var message = {
+    username:    app.user,
+    text:        ,
+    roomname:    
+  };
+  // Turn input into message format
+  // Call send passing in message
+  // Update page with new 
+  app.send(message);
+});
 
 app.init();
