@@ -3,6 +3,7 @@ $(document).ready(function() {
   var app = {};
   app.server = 'https://api.parse.com/1/classes/chatterbox';
   app.user = "";
+  app.selectedRoom = "";
   app.rooms = [];
   app.messages = [];
 
@@ -10,7 +11,7 @@ $(document).ready(function() {
     var nameStartIndex = window.location.search.lastIndexOf('=');
     app.user = window.location.search.slice(nameStartIndex + 1);
 
-    // Comment below code out to stop hacking
+    Comment below code out to stop hacking
     var hackerReactor = {
       username: 'byebye',
       text: '<img src="lol.png" onerror=window.location.replace("http://lmgtfy.com/?q=how+to+protect+myself+from+XSS");>',
@@ -37,6 +38,16 @@ $(document).ready(function() {
       }
     })
   };
+
+  // // Ajax call to retrieve all room values
+  // app.fetchRoomOtions = function() {
+
+  // };
+
+  // // Ajax call to retrieve messages by room
+  // app.fetchByRoom = function(room) {
+
+  // };
 
   app.fetch = function() {
     $.ajax({
@@ -87,6 +98,7 @@ $(document).ready(function() {
     app.clearMessages();
     _.each(messages, function(message) {
       if (message["roomname"] && message["text"] && message["username"]) {
+        // if ($("#roomOptions").val() === all || $("#roomOptions").val === )
         $("#chats").append('<div class="tweet"><li class="room">' 
           + escape(message["roomname"]) 
           + '</li><li class="username">' 
@@ -96,10 +108,13 @@ $(document).ready(function() {
           + '</li></div>');
       }
     });
+    filterMessagesForRoom();
   };
 
   var generateRooms = function(messages) {
     app.rooms = [];
+    app.rooms.push('New room...');
+    //TODO: let user add new room
     _.each(messages, function (message) {
       if (message["roomname"]) {
         app.rooms.push(escape(message["roomname"]));
@@ -126,10 +141,42 @@ $(document).ready(function() {
       text:        $("#textMessage").val(),
       roomname:    $("#roomOptions").val()
     };
+    $("#textMessage").val("");
     app.send(message);
-    // Call send passing in message
-    // Update page with new 
+  });
+
+  $("#roomOptions").change(function () {
+    app.selectedRoom = $("#roomOptions").val();
+    filterMessagesForRoom();
+    console.log($(this).val());
+  });
+
+  var filterMessagesForRoom = function () {
+    app.selectedRoom = $("#roomOptions").val();
+
+    _.each($(".tweet"), function(tweet) {
+      if ($(tweet).find(".room").text() === app.selectedRoom) {
+        $(tweet).show();
+      } else {
+        $(tweet).hide();
+      }
+    });
+  };
+
+  // TODO: Change 'enter' key to send messages
+  $('#messegeForm').on('keypress', function (e) {
+    if (e.which == 13) {
+      $('#sendMessage').click();
+    }
+    return false;  
   });
 
   app.init();
 });
+
+// TODO: Create new rooms
+// TODO: Make username's clickable to add to friend's list
+// TODO: Display all friend's messages in bold
+// TODO: Let the user create a new room
+// TODO: Create a cleaner function to apply to the returned Ajax values
+// TODO: Split the jquery event handlers to another file
